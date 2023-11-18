@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.autolistapp
 
 import org.junit.Test
 
