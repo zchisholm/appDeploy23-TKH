@@ -13,7 +13,7 @@ interface OnItemClickListener {
 }
 
 class ShoppingListAdapter(
-    private val items: List<ShoppingItem>,
+    private val items: MutableList<ShoppingItem>, // Change this to MutableList
     private val listener: OnItemClickListener // Pass the listener to the adapter
 ) : RecyclerView.Adapter<ShoppingListAdapter.ViewHolder>() {
 
@@ -40,4 +40,9 @@ class ShoppingListAdapter(
     }
 
     override fun getItemCount() = items.size
+
+    fun addItem(item: ShoppingItem) {
+        items.add(item)
+        notifyItemInserted(items.size - 1)
+    }
 }
