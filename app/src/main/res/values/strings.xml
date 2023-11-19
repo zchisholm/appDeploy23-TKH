@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AutoListApp</string>
+    <string name="hint_new_list_name">Enter list name</string>
 </resources>

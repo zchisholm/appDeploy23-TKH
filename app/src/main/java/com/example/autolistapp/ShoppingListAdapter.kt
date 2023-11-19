@@ -1,26 +1,34 @@
 package com.example.autolistapp
 
+import android.view.GestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 
-// Define an interface for click events
-interface OnItemClickListener {
-    fun onItemClick(item: ShoppingItem)
-}
-
 class ShoppingListAdapter(
-    private val items: MutableList<ShoppingItem>, // Change this to MutableList
-    private val listener: OnItemClickListener // Pass the listener to the adapter
+    private val items: MutableList<ShoppingItem>
 ) : RecyclerView.Adapter<ShoppingListAdapter.ViewHolder>() {
 
-    // Define the ViewHolder class inside the Adapter class
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val itemName: TextView = view.findViewById(R.id.tvItemName)
-        val itemCheckbox: CheckBox = view.findViewById(R.id.checkBox)
+
+        val gestureDetector = GestureDetector(view.context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                itemView.performClick()  // Optional: Mimic click behavior on double tap
+                return true
+            }
+        })
+
+        init {
+            view.setOnTouchListener { _, event ->
+                gestureDetector.onTouchEvent(event)
+                true
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,11 +39,12 @@ class ShoppingListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = items[position]
         holder.itemName.text = currentItem.name
-        holder.itemCheckbox.isChecked = currentItem.isBought
+        holder.itemName.paint.isStrikeThruText = currentItem.isCrossedOut
 
-        // Set an OnClickListener on the itemView
+        // Respond to double tap using the ViewHolder's GestureDetector
         holder.itemView.setOnClickListener {
-            listener.onItemClick(currentItem)
+            currentItem.isCrossedOut = !currentItem.isCrossedOut
+            notifyItemChanged(position)
         }
     }
 
@@ -44,5 +53,15 @@ class ShoppingListAdapter(
     fun addItem(item: ShoppingItem) {
         items.add(item)
         notifyItemInserted(items.size - 1)
+    }
+
+    fun removeItem(position: Int) {
+        items.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun restoreItem(item: ShoppingItem, position: Int) {
+        items.add(position, item)
+        notifyItemInserted(position)
     }
 }
