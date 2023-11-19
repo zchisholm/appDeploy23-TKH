@@ -22,15 +22,25 @@ class ListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_list)
 
         listName = intent.getStringExtra("LIST_NAME") ?: "New List"
         title = listName
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = ShoppingListAdapter(shoppingList)
-        recyclerView.adapter = adapter
+        adapter = ShoppingListAdapter(shoppingList,
+            onItemSingleTap = { item ->
+                // Toggle crossed-out state of the item
+                item.isCrossedOut = !item.isCrossedOut
+                adapter.notifyItemChanged(shoppingList.indexOf(item))
+            },
+            onItemDoubleTap = { item ->
+                val position = shoppingList.indexOf(item)
+                // Open a dialog to edit the item
+                showEditItemDialog(item, position)
+            }
+        )
 
         val fab: FloatingActionButton = findViewById(R.id.fab_add_item)
         fab.setOnClickListener {
@@ -102,25 +112,55 @@ class ListActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showEditItemDialog(item: ShoppingItem, position: Int) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_item, null)
+        val editTextItemName = dialogView.findViewById<EditText>(R.id.editTextItemName)
+        val editTextItemQuantity = dialogView.findViewById<EditText>(R.id.editTextItemQuantity)
+
+        // Pre-populate dialog with current item details
+        editTextItemName.setText(item.name)
+        editTextItemQuantity.setText(item.quantity?.toString() ?: "")
+
+        AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setTitle("Edit Item")
+            .setPositiveButton("Update") { dialog, _ ->
+                val updatedName = editTextItemName.text.toString().trim()
+                val updatedQuantityString = editTextItemQuantity.text.toString().trim()
+                val updatedQuantity = if (updatedQuantityString.isEmpty()) null else updatedQuantityString.toIntOrNull()
+
+                if (validateInput(updatedName, updatedQuantity)) {
+                    // Update the item in the shopping list
+                    item.name = updatedName
+                    item.quantity = updatedQuantity
+                    adapter.notifyItemChanged(position)
+                    updateEmptyStateView()
+                } else {
+                    Toast.makeText(this, "Invalid input. Please enter a valid name and quantity.", Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun validateInput(name: String, quantity: Int?): Boolean {
         return name.isNotEmpty() && (quantity == null || quantity > 0)
     }
 
     private fun updateEmptyStateView() {
         val emptyStateView: TextView = findViewById(R.id.emptyStateView)
-        if (shoppingList.isEmpty()) {
-            emptyStateView.visibility = View.VISIBLE
-        } else {
-            emptyStateView.visibility = View.GONE
-        }
+        emptyStateView.visibility = if (shoppingList.isEmpty()) View.VISIBLE else View.GONE
     }
 
+
     private fun addItemToList(name: String, quantity: Int?) {
-        val newItem = ShoppingItem(name, quantity)
+        val newItem = ShoppingItem(name, quantity ?: 0)
         shoppingList.add(newItem)
+        //Log.d("ListActivity", "Item added: ${newItem.name}")
         adapter.notifyItemInserted(shoppingList.size - 1)
         updateEmptyStateView()
     }
+
 
 
 }
