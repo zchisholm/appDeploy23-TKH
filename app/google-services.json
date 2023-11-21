@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "984625443330",
+    "project_id": "autolistapp",
+    "storage_bucket": "autolistapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984625443330:android:6e85ee40049d6105f92d1b",
+        "android_client_info": {
+          "package_name": "com.example.autolistapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALmVMZa8EFD75nuwb1adzIKPNpCQrhmnk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
